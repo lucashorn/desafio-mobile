@@ -116,4 +116,26 @@ export class PhotoService {
       }
     }
   }
+  public async deletePicture(photo: UserPhoto, position: number) {
+    // Remove a foto do array de fotos
+    this.photos.splice(position, 1);
+  
+    // Atualiza o armazenamento local
+    await Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos)
+    });
+  
+    // Exclui o arquivo do sistema de arquivos
+    const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
+  
+    try {
+      await Filesystem.deleteFile({
+        path: filename,
+        directory: Directory.Data
+      });
+    } catch (error) {
+      console.error('Erro ao excluir o arquivo', error);
+    }
+  }  
 }
