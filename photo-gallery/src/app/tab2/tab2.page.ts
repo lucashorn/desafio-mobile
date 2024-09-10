@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PhotoService } from '../services/photo.service'; // Ajuste o caminho conforme necessário
 
 @Component({
   selector: 'app-tab2',
@@ -6,7 +7,10 @@ import { Component } from '@angular/core';
   styleUrls: ['tab2.page.scss']
 })
 export class Tab2Page {
+  constructor(public photoService: PhotoService) {}
 
-  constructor() {}
-
+  // Método para adicionar uma nova foto à galeria
+  addPhotoToGallery() {
+    this.photoService.addNewToGallery();
+  }
 }
