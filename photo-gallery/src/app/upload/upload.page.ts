@@ -3,11 +3,11 @@ import { ActionSheetController } from '@ionic/angular';
 import { PhotoService, UserPhoto } from '../services/photo.service';
 
 @Component({
-  selector: 'app-tab2',
-  templateUrl: 'tab2.page.html',
-  styleUrls: ['tab2.page.scss']
+  selector: 'app-upload',
+  templateUrl: 'upload.page.html',
+  styleUrls: ['upload.page.scss']
 })
-export class Tab2Page implements OnInit {
+export class UploadPage implements OnInit {
 
   constructor(public photoService: PhotoService,
               public actionSheetController: ActionSheetController) {}
@@ -22,7 +22,7 @@ export class Tab2Page implements OnInit {
 
   public async showActionSheet(photo: UserPhoto, position: number) {
     const actionSheet = await this.actionSheetController.create({
-      header: 'Photos',
+      header: 'Fotos',
       buttons: [{
         text: 'Delete',
         role: 'destructive',
