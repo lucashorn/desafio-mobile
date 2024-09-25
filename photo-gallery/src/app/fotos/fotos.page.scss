@@ -1,0 +1,20 @@
+.photo-feed {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  
+  ion-fab {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  ion-card {
+    margin-bottom: 20px;
+  }
+
+  ion-button {
+    z-index: 10;
+  }

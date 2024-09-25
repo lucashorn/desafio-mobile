@@ -15,8 +15,35 @@
 
   <ion-grid>
     <ion-row>
-      <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
-        <ion-img [src]="photo.webviewPath" (click)="showActionSheet(photo, position)"></ion-img>
+      <ion-col size="12" *ngFor="let photo of photoService.photos; index as position">
+        <ion-card>
+          <ion-img [src]="photo.webviewPath" class="photo-feed" (click)="showActionSheet(photo, position)"></ion-img>
+
+          <ion-button 
+          fill="clear" 
+          size="small" 
+          color="danger" 
+          (click)="likePhoto(position)" 
+          style="position: absolute; top: 10px; right: 10px;">
+          <ion-icon name="heart"></ion-icon>
+          <span>{{ likes[position] || 0 }}</span>
+        </ion-button>
+
+          <ion-card-content>
+            <ion-item>
+              <ion-textarea placeholder="Adicionar um comentário..." [(ngModel)]="newComment[position]"></ion-textarea>
+            </ion-item>
+            <ion-button expand="full" (click)="addComment(position)">Postar Comentário</ion-button>
+
+            <ion-list *ngIf="photo.comments && photo.comments.length > 0">
+              <ion-item *ngFor="let comment of photo.comments">
+                <ion-label>
+                  <p>Teste de comentario</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>

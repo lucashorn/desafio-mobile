@@ -9,6 +9,7 @@ export interface UserPhoto {
   filepath: string;
   webviewPath?: string;
   timestamp?: number;
+  comments?: string[];
 }
 
 @Injectable({
