@@ -8,6 +8,7 @@ import { Capacitor } from '@capacitor/core';
 export interface UserPhoto {
   filepath: string;
   webviewPath?: string;
+  timestamp?: number;
 }
 
 @Injectable({
@@ -17,7 +18,7 @@ export class PhotoService {
   public photos: UserPhoto[] = [];
   private PHOTO_STORAGE: string = 'photos';
   private platform: Platform;
-  public temporaryPhotos: UserPhoto[] = []; // Armazena fotos temporárias
+  public temporaryPhotos: UserPhoto[] = [];
 
   constructor(private actionSheetController: ActionSheetController, platform: Platform) {
     this.platform = platform;
@@ -38,7 +39,6 @@ export class PhotoService {
         icon: 'close',
         role: 'cancel',
         handler: () => {
-          // Nothing to do, action sheet is automatically closed
         }
       }]
     });
@@ -54,7 +54,9 @@ export class PhotoService {
       });
 
       const savedImageFile = await this.savePicture(capturedPhoto);
-      this.temporaryPhotos.push(savedImageFile); // Adiciona à lista temporária
+      savedImageFile.timestamp = Date.now();
+      // Adiciona à lista temporária
+      this.temporaryPhotos.push(savedImageFile);
 
       console.log('Foto capturada e armazenada temporariamente:', savedImageFile);
 
@@ -76,6 +78,9 @@ export class PhotoService {
 
     // Limpa a lista de fotos temporárias
     this.temporaryPhotos = [];
+
+    this.photos.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
+
   }
 
   public async discardAllPhotos() {
@@ -147,6 +152,9 @@ export class PhotoService {
         photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
       }
     }
+
+    this.photos.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
+
   }
 
   public async deletePicture(photo: UserPhoto, position: number) {
