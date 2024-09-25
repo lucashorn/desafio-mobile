@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-Menu',
@@ -7,6 +8,9 @@ import { Component } from '@angular/core';
 })
 export class MenuPage {
 
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
+  logout() {
+    this.authService.logout();
+  }
 }
