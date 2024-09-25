@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PhotoService, UserPhoto } from '../services/photo.service';
 
 @Component({
   selector: 'app-fotos',
@@ -7,6 +8,10 @@ import { Component } from '@angular/core';
 })
 export class FotosPage {
 
-  constructor() {}
+  constructor(public photoService: PhotoService) {}
+
+  public showActionSheet(photo: UserPhoto, position: number) {
+    this.photoService.showActionSheet(photo, position);
+  }
 
 }

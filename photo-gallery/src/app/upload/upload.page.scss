@@ -1,0 +1,19 @@
+  ion-fab-button {
+    --background: #ffffff;
+    --color: #000000;
+  }
+  
+  .confirm-button {
+    --background: #28a745;
+    --color: #ffffff;
+  }
+  
+  .discard-button {
+    --background: #dc3545;
+    --color: #ffffff;
+  }
+
+  .fab-action-container {
+    display: flex;
+    gap: 16px;
+  }

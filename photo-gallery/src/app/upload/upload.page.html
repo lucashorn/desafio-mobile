@@ -14,19 +14,30 @@
     </ion-toolbar>
   </ion-header>
 
-  <!-- Grade para exibir as fotos -->
-  <ion-grid>
-    <ion-row>
-      <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
-        <ion-img [src]="photo.webviewPath" (click)="showActionSheet(photo, position)"></ion-img>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
-  <!-- Botão flutuante (FAB) para a câmera -->
   <ion-fab vertical="bottom" horizontal="center" slot="fixed">
+    <div *ngIf="hasTemporaryPhotos" class="fab-action-container">
+      <ion-fab-button (click)="confirmPhotos()" class="confirm-button">
+        <ion-icon name="checkmark"></ion-icon>
+      </ion-fab-button>
+    </div>
+
     <ion-fab-button (click)="addPhotoToGallery()">
       <ion-icon name="camera"></ion-icon>
     </ion-fab-button>
+    
+    <div *ngIf="hasTemporaryPhotos" class="fab-action-container">
+      <ion-fab-button (click)="discardPhotos()" class="discard-button">
+        <ion-icon name="close"></ion-icon>
+      </ion-fab-button>
+    </div>
   </ion-fab>
+
+  <!-- Exibir fotos temporárias -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6" *ngFor="let photo of photoService.temporaryPhotos">
+        <ion-img [src]="photo.webviewPath"></ion-img>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

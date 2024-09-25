@@ -2,10 +2,9 @@ import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
-import { Platform } from '@ionic/angular';
-import { Capacitor } from '@capacitor/core'; // Adicione esta importação
+import { ActionSheetController, Platform } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
 
-// Interface para os metadados das fotos
 export interface UserPhoto {
   filepath: string;
   webviewPath?: string;
@@ -18,42 +17,74 @@ export class PhotoService {
   public photos: UserPhoto[] = [];
   private PHOTO_STORAGE: string = 'photos';
   private platform: Platform;
+  public temporaryPhotos: UserPhoto[] = []; // Armazena fotos temporárias
 
-  constructor(platform: Platform) {
+  constructor(private actionSheetController: ActionSheetController, platform: Platform) {
     this.platform = platform;
   }
 
-  // Método para capturar uma nova foto com a câmera
-  public async addNewToGallery() {
+  public async showActionSheet(photo: UserPhoto, position: number) {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Fotos',
+      buttons: [{
+        text: 'Delete',
+        role: 'destructive',
+        icon: 'trash',
+        handler: () => {
+          this.deletePicture(photo, position);
+        }
+      }, {
+        text: 'Cancel',
+        icon: 'close',
+        role: 'cancel',
+        handler: () => {
+          // Nothing to do, action sheet is automatically closed
+        }
+      }]
+    });
+    await actionSheet.present();
+  }
+
+  public async capturePhoto(): Promise<UserPhoto> {
     try {
-      // Captura a foto
       const capturedPhoto = await Camera.getPhoto({
         resultType: CameraResultType.Uri,
         source: CameraSource.Camera,
         quality: 100
       });
 
-      // Salva a foto e adiciona ao array de fotos
       const savedImageFile = await this.savePicture(capturedPhoto);
-      this.photos.unshift(savedImageFile);
+      this.temporaryPhotos.push(savedImageFile); // Adiciona à lista temporária
 
-      // Salva o array de fotos nas preferências
-      await Preferences.set({
-        key: this.PHOTO_STORAGE,
-        value: JSON.stringify(this.photos),
-      });
+      console.log('Foto capturada e armazenada temporariamente:', savedImageFile);
 
-      console.log('Foto capturada e adicionada com sucesso:', savedImageFile);
+      return savedImageFile;
     } catch (error) {
       console.error('Erro ao capturar a foto:', error);
+      throw error;
     }
   }
 
-  private async savePicture(photo: Photo) {
-    // Converte a foto para o formato base64
-    const base64Data = await this.readAsBase64(photo);
+  public async confirmAllPhotos() {
+    // Adiciona todas as fotos temporárias à galeria permanente
+    this.photos.push(...this.temporaryPhotos);
 
-    // Escreve o arquivo no diretório de dados
+    await Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+    // Limpa a lista de fotos temporárias
+    this.temporaryPhotos = [];
+  }
+
+  public async discardAllPhotos() {
+    // Limpa a lista de fotos temporárias sem salvar
+    this.temporaryPhotos = [];
+  }
+
+  private async savePicture(photo: Photo): Promise<UserPhoto> {
+    const base64Data = await this.readAsBase64(photo);
     const fileName = Date.now() + '.jpeg';
     const savedFile = await Filesystem.writeFile({
       path: fileName,
@@ -62,13 +93,11 @@ export class PhotoService {
     });
 
     if (this.platform.is('hybrid')) {
-      // Exibe a nova imagem convertendo o caminho 'file://' para HTTP
       return {
         filepath: savedFile.uri,
         webviewPath: Capacitor.convertFileSrc(savedFile.uri),
       };
     } else {
-      // Usa o webPath para exibir a nova imagem em vez de base64
       return {
         filepath: fileName,
         webviewPath: photo.webPath
@@ -76,37 +105,40 @@ export class PhotoService {
     }
   }
 
-  private async readAsBase64(photo: Photo) {
+  private async readAsBase64(photo: Photo): Promise<string> {
     if (this.platform.is('hybrid')) {
-      // Lê o arquivo no formato base64 para plataformas móveis
       const file = await Filesystem.readFile({
         path: photo.path!
       });
-      return file.data;
+
+      if (typeof file.data === 'string') {
+        return file.data;
+      } else {
+        throw new Error('Dados lidos não são do tipo string');
+      }
     } else {
-      // Web: busca a foto, lê como um blob e converte para formato base64
       const response = await fetch(photo.webPath!);
       const blob = await response.blob();
-      return await this.convertBlobToBase64(blob) as string;
+      return await this.convertBlobToBase64(blob);
     }
   }
 
-  private convertBlobToBase64 = (blob: Blob) => new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = () => {
-      resolve(reader.result as string);
-    };
-    reader.readAsDataURL(blob);
-  });
+  private convertBlobToBase64(blob: Blob): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
 
   public async loadSaved() {
-    // Recupera os dados da foto salvos nas preferências
     const { value } = await Preferences.get({ key: this.PHOTO_STORAGE });
     this.photos = (value ? JSON.parse(value) : []) as UserPhoto[];
 
     if (!this.platform.is('hybrid')) {
-      // Plataforma web: lê a foto do sistema de arquivos em formato base64
       for (let photo of this.photos) {
         const readFile = await Filesystem.readFile({
           path: photo.filepath,
@@ -116,19 +148,17 @@ export class PhotoService {
       }
     }
   }
+
   public async deletePicture(photo: UserPhoto, position: number) {
-    // Remove a foto do array de fotos
     this.photos.splice(position, 1);
-  
-    // Atualiza o armazenamento local
+
     await Preferences.set({
       key: this.PHOTO_STORAGE,
       value: JSON.stringify(this.photos)
     });
-  
-    // Exclui o arquivo do sistema de arquivos
+
     const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
-  
+
     try {
       await Filesystem.deleteFile({
         path: filename,
@@ -137,5 +167,5 @@ export class PhotoService {
     } catch (error) {
       console.error('Erro ao excluir o arquivo', error);
     }
-  }  
+  }
 }
