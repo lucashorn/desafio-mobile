@@ -4,55 +4,62 @@ ion-content {
     justify-content: center;
     align-items: center;
     height: 100vh;
-}
-
-.login-container {
+  }
+  
+  .login-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%;
     max-width: 400px;
     margin: auto;
-}
-
-.logo-container {
+  }
+  
+  .logo-container {
     margin-bottom: 20px;
-}
-
-.logo {
+  }
+  
+  .logo {
     width: 150px;
     height: 150px;
     border-radius: 50%;
-}
-
-.form-container {
+  }
+  
+  .form-container {
     width: 100%;
-}
-
-.button-container {
+  }
+  
+  .button-container {
     margin-top: 15px;
-}
-
-.signup-message {
+  }
+  
+  .signup-message {
     margin-top: 15px;
     font-size: 14px;
     color: var(--ion-color-medium);
     text-align: center;
-}
-
-.signup-message a {
+  }
+  
+  .signup-message a {
     color: var(--ion-color-primary);
     text-decoration: underline;
-}
-
-ion-item {
+  }
+  
+  ion-item {
     --border-radius: 10px;
     --padding-start: 15px;
     margin-bottom: 15px;
-}
-
-ion-icon {
-    font-size: 20px;
-}
+    position: relative;
+  }
+  
+  ion-label {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+  
+  ion-label.ion-floating {
+    font-size: 12px;
+    color: var(--ion-color-primary);
+  }
+  
