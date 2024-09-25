@@ -24,12 +24,12 @@
             <ion-col size="12">
               <div class="button-container">
 
-                <ion-button fill="clear" color="danger" size="small" (click)="likePhoto(position)">
-                  <ion-icon name="heart"></ion-icon>
-                  <span>{{ likes[position] || 0 }}</span>
+                <ion-button class="action_button" fill="clear" color="danger" size="small" (click)="toggleLike(position)">
+                  <ion-icon [name]="likes[position] ? 'heart' : 'heart-outline'"></ion-icon>
+                  <span>  {{ likes[position] || 0 }}</span>
                 </ion-button>
 
-                <ion-button fill="clear" size="small" (click)="toggleComments(position)">
+                <ion-button class="action_button" fill="clear" size="small" (click)="toggleComments(position)">
                   <ion-icon name="chatbubble"></ion-icon>
                   <span>{{ photo.comments ? photo.comments.length : 0 }}</span>
                 </ion-button>
