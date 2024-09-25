@@ -23,29 +23,46 @@ export class FotosPage {
     this.photoService.showActionSheet(photo, position);
   }
 
-  public toggleLike(position: number) {
-    if (this.likes[position]) {
-      this.likes[position] = 0;
-    } else {
-      this.likes[position] = 1;
+  public async toggleLike(position: number) {
+    const photo = this.photoService.photos[position];
+    console.log('Photo :', photo);
+    console.log('position :', position);
+    console.log('liked :', photo.liked);
+    console.log('likes :', photo.likes);
+
+    if (photo.likes === undefined) {
+      photo.likes = 0;
+      photo.liked = false;
     }
+  
+    if (photo.liked) {
+      photo.likes -= 1;
+    } else {
+      photo.likes += 1;
+    }
+    photo.liked = !photo.liked;
+  
+    // Atualiza a foto no serviço
+    await this.photoService.updatePhoto(photo);
   }
 
   public toggleComments(position: number) {
     this.showComments[position] = !this.showComments[position];
   }
 
-  public addComment(position: number) {
+  public async addComment(position: number) {
     const photo = this.photoService.photos[position];
-    
+  
     if (!photo.comments || !Array.isArray(photo.comments)) {
       photo.comments = [];
     }
-
+  
     if (this.newComment[position]) {
       photo.comments.push(this.newComment[position]);
-
       this.newComment[position] = '';
+  
+      // Atualiza a foto no serviço
+      await this.photoService.updatePhoto(photo);
     }
   }
 }

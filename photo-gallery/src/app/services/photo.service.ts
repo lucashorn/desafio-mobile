@@ -9,6 +9,8 @@ export interface UserPhoto {
   filepath: string;
   webviewPath?: string;
   timestamp?: number;
+  likes?: number;
+  liked?: boolean;
   comments?: string[];
 }
 
@@ -56,6 +58,9 @@ export class PhotoService {
 
       const savedImageFile = await this.savePicture(capturedPhoto);
       savedImageFile.timestamp = Date.now();
+      savedImageFile.likes = 0;
+      savedImageFile.comments = [];
+
       // Adiciona à lista temporária
       this.temporaryPhotos.push(savedImageFile);
 
@@ -175,6 +180,17 @@ export class PhotoService {
       });
     } catch (error) {
       console.error('Erro ao excluir o arquivo', error);
+    }
+  }
+
+  public async updatePhoto(photo: UserPhoto) {
+    const index = this.photos.findIndex(p => p.filepath === photo.filepath);
+    if (index > -1) {
+      this.photos[index] = photo;
+      await Preferences.set({
+        key: this.PHOTO_STORAGE,
+        value: JSON.stringify(this.photos)
+      });
     }
   }
 }
