@@ -6,13 +6,10 @@ import { PhotoService, UserPhoto } from '../services/photo.service';
   templateUrl: 'upload.page.html',
   styleUrls: ['upload.page.scss']
 })
-export class UploadPage implements OnInit {
+export class UploadPage {
 
   constructor(public photoService: PhotoService) {}
 
-  async ngOnInit() {
-    await this.photoService.loadSaved();
-  }
 
   async addPhotoToGallery() {
     await this.photoService.capturePhoto();

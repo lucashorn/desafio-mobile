@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PhotoService, UserPhoto } from '../services/photo.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { PhotoService, UserPhoto } from '../services/photo.service';
   templateUrl: 'fotos.page.html',
   styleUrls: ['fotos.page.scss']
 })
-export class FotosPage {
+export class FotosPage implements OnInit {
   public likes: { [key: number]: number } = {};
   public showComments: { [key: number]: boolean } = {};
   public newComment: { [key: number]: string } = {};
@@ -19,16 +19,16 @@ export class FotosPage {
     });
   }
 
+  async ngOnInit() {
+    await this.photoService.loadSaved();
+  }
+
   public showActionSheet(photo: UserPhoto, position: number) {
     this.photoService.showActionSheet(photo, position);
   }
 
   public async toggleLike(position: number) {
     const photo = this.photoService.photos[position];
-    console.log('Photo :', photo);
-    console.log('position :', position);
-    console.log('liked :', photo.liked);
-    console.log('likes :', photo.likes);
 
     if (photo.likes === undefined) {
       photo.likes = 0;
