@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Fotos
-    </ion-title>
+    <ion-title>Fotos</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -15,35 +13,43 @@
 
   <ion-grid>
     <ion-row>
-      <ion-col size="12" *ngFor="let photo of photoService.photos; index as position">
-        <ion-card>
-          <ion-img [src]="photo.webviewPath" class="photo-feed" (click)="showActionSheet(photo, position)"></ion-img>
+      <ion-col size="12" *ngFor="let photo of photoService.photos; index as position" style="margin-bottom: 16px;">
 
-          <ion-button 
-          fill="clear" 
-          size="small" 
-          color="danger" 
-          (click)="likePhoto(position)" 
-          style="position: absolute; top: 10px; right: 10px;">
-          <ion-icon name="heart"></ion-icon>
-          <span>{{ likes[position] || 0 }}</span>
-        </ion-button>
+        <ion-img [src]="photo.webviewPath" (click)="showActionSheet(photo, position)" style="width: 100%;"></ion-img>
 
-          <ion-card-content>
+
+        <ion-footer class="photo-footer">
+          <ion-row>
+
+            <ion-col size="12">
+              <div class="button-container">
+
+                <ion-button fill="clear" color="danger" size="small" (click)="likePhoto(position)">
+                  <ion-icon name="heart"></ion-icon>
+                  <span>{{ likes[position] || 0 }}</span>
+                </ion-button>
+
+                <ion-button fill="clear" size="small" (click)="toggleComments(position)">
+                  <ion-icon name="chatbubble"></ion-icon>
+                  <span>{{ photo.comments ? photo.comments.length : 0 }}</span>
+                </ion-button>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <div *ngIf="showComments[position]" class="comments-section">
             <ion-item>
-              <ion-textarea placeholder="Adicionar um comentário..." [(ngModel)]="newComment[position]"></ion-textarea>
+              <ion-input [(ngModel)]="newComment[position]" placeholder="Digite seu comentário"></ion-input>
             </ion-item>
-            <ion-button expand="full" (click)="addComment(position)">Postar Comentário</ion-button>
+            <ion-button expand="block" size="small" (click)="addComment(position)">Adicionar Comentário</ion-button>
 
             <ion-list *ngIf="photo.comments && photo.comments.length > 0">
               <ion-item *ngFor="let comment of photo.comments">
-                <ion-label>
-                  <p>{{ comment }}</p>
-                </ion-label>
+                <ion-label>{{ comment }}</ion-label>
               </ion-item>
             </ion-list>
-          </ion-card-content>
-        </ion-card>
+          </div>
+        </ion-footer>
       </ion-col>
     </ion-row>
   </ion-grid>

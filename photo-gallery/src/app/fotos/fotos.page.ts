@@ -7,8 +7,9 @@ import { PhotoService, UserPhoto } from '../services/photo.service';
   styleUrls: ['fotos.page.scss']
 })
 export class FotosPage {
-  public newComment: { [key: number]: string } = {};  // Armazena o novo comentário para cada foto
-  public likes: { [key: number]: number } = {}; // Armazena o número de likes para cada foto
+  public newComment: { [key: number]: string } = {};
+  public likes: { [key: number]: number } = {};
+  public showComments: { [key: number]: boolean } = {}; 
 
   constructor(public photoService: PhotoService) {}
 
@@ -18,28 +19,27 @@ export class FotosPage {
 
   // Função para adicionar comentário
   public addComment(position: number) {
-    if (!this.newComment[position]) return; // Verifica se há um novo comentário a ser adicionado
+    if (!this.newComment[position]) return; 
   
-    // Verifica se o array de comentários existe, caso contrário, inicializa-o como um array vazio
     if (!this.photoService.photos[position].comments) {
       this.photoService.photos[position].comments = [];
     }
   
-    // Adiciona o novo comentário ao array de comentários da foto
     this.photoService.photos[position].comments!.push(this.newComment[position]);
   
-    // Limpa o campo de comentário
     this.newComment[position] = '';
   }
   
 
-  // Função para dar like
   public likePhoto(position: number) {
     if (!this.likes[position]) {
       this.likes[position] = 0;
     }
 
-    // Incrementa o contador de likes
     this.likes[position]++;
+  }
+
+  public toggleComments(position: number) {
+    this.showComments[position] = !this.showComments[position];
   }
 }

@@ -18,3 +18,22 @@
   ion-button {
     z-index: 10;
   }
+
+  .photo-footer {
+    background-color: #f8f8f8;
+    border-top: 1px solid #e1e1e1;
+  }
+  
+  .button-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .comments-section {
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-top: 1px solid #e1e1e1;
+  }
+  
+  
