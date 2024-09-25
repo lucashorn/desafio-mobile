@@ -38,7 +38,7 @@
             <ion-list *ngIf="photo.comments && photo.comments.length > 0">
               <ion-item *ngFor="let comment of photo.comments">
                 <ion-label>
-                  <p>Teste de comentario</p>
+                  <p>{{ comment }}</p>
                 </ion-label>
               </ion-item>
             </ion-list>
