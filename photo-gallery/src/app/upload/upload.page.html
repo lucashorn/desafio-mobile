@@ -15,21 +15,27 @@
   </ion-header>
 
   <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-    <div *ngIf="hasTemporaryPhotos" class="fab-action-container">
-      <ion-fab-button (click)="confirmPhotos()" class="confirm-button">
-        <ion-icon name="checkmark"></ion-icon>
-      </ion-fab-button>
-    </div>
-
-    <ion-fab-button (click)="addPhotoToGallery()">
-      <ion-icon name="camera"></ion-icon>
-    </ion-fab-button>
-    
-    <div *ngIf="hasTemporaryPhotos" class="fab-action-container">
-      <ion-fab-button (click)="discardPhotos()" class="discard-button">
-        <ion-icon name="close"></ion-icon>
-      </ion-fab-button>
-    </div>
+    <ion-row>
+      <ion-col>
+        <div *ngIf="hasTemporaryPhotos" class="fab-action-container">
+          <ion-fab-button (click)="discardPhotos()" class="discard-button">
+            <ion-icon name="close"></ion-icon>
+          </ion-fab-button>
+        </div>
+      </ion-col>
+      <ion-col>
+        <ion-fab-button (click)="addPhotoToGallery()">
+          <ion-icon name="camera"></ion-icon>
+        </ion-fab-button>
+      </ion-col>
+      <ion-col>
+        <div *ngIf="hasTemporaryPhotos" class="fab-action-container">
+          <ion-fab-button (click)="confirmPhotos()" class="confirm-button">
+            <ion-icon name="checkmark"></ion-icon>
+          </ion-fab-button>
+        </div>  
+      </ion-col>
+    </ion-row>
   </ion-fab>
 
   <!-- Exibir fotos temporárias -->
