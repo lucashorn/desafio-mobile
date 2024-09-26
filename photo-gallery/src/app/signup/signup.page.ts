@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { PhotoService } from '../services/photo.service';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-signup',
@@ -13,7 +14,11 @@ export class SignupPage {
   apelido: string = '';
   profileImage?: string;
 
-  constructor(private router: Router, private photoService: PhotoService) {}
+  constructor(
+    private router: Router, 
+    private photoService: PhotoService,
+    private toastController: ToastController
+  ) {}
 
   async addPhotoToGallery() {
     try {
@@ -25,21 +30,40 @@ export class SignupPage {
   }
 
   async register() {
-    if (this.username && this.password) {
+    if (this.username && this.password && this.apelido) {
       const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
       const userExists = existingUsers.some((user: any) => user.username === this.username);
 
       if (userExists) {
-        this.showAlert('Usuário já existe!');
+        await this.presentToast('Usuário já existe!', 'danger');
         return;
       }
 
       existingUsers.push({ username: this.username, password: this.password, profileImage: this.profileImage });
       localStorage.setItem('users', JSON.stringify(existingUsers));
+
+       // Limpa os campos do formulário
+       this.username = '';
+       this.password = '';
+       this.apelido = '';
+       this.profileImage = undefined;
+ 
+       await this.presentToast('Cadastro realizado com sucesso!');
+
       this.router.navigate(['/login']);
     } else {
-      this.showAlert('Por favor, preencha todos os campos.');
+      await this.presentToast('Por favor, preencha todos os campos.', 'danger');
     }
+  }
+
+  private async presentToast(message: string, color: string = 'success') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 4000,
+      position: 'top',
+      color: color,
+    });
+    await toast.present();
   }
 
   async handleImageUpload(event: Event) {
