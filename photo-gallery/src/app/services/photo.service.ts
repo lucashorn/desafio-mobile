@@ -13,7 +13,6 @@ export interface UserPhoto {
   liked?: boolean;
   comments?: string[];
 }
-
 @Injectable({
   providedIn: 'root'
 })
@@ -48,7 +47,7 @@ export class PhotoService {
     await actionSheet.present();
   }
 
-  public async capturePhoto(): Promise<UserPhoto> {
+  public async capturePhoto(saveTemporary = true): Promise<UserPhoto> {
     try {
       const capturedPhoto = await Camera.getPhoto({
         resultType: CameraResultType.Uri,
@@ -62,7 +61,8 @@ export class PhotoService {
       savedImageFile.comments = [];
 
       // Adiciona à lista temporária
-      this.temporaryPhotos.push(savedImageFile);
+      if (saveTemporary)
+        this.temporaryPhotos.push(savedImageFile);
 
       console.log('Foto capturada e armazenada temporariamente:', savedImageFile);
 

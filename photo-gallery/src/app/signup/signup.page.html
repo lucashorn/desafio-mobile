@@ -4,14 +4,36 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding">
+  <ion-item>
+    <ion-label position="floating">Apelido</ion-label>
+    <ion-input [(ngModel)]="apelido" type="text"></ion-input>
+  </ion-item>
+
   <ion-item>
     <ion-label position="floating">Usuário</ion-label>
     <ion-input [(ngModel)]="username" type="text"></ion-input>
   </ion-item>
+
   <ion-item>
     <ion-label position="floating">Senha</ion-label>
     <ion-input [(ngModel)]="password" type="password"></ion-input>
   </ion-item>
+
+  <ion-item>
+    <ion-label>Imagem de Perfil</ion-label>
+    <div class="image-upload-container">
+      <div class="profile-image-preview">
+        <img [src]="profileImage || 'assets/icon/user.png'" />
+      </div>
+      <ion-fab-button (click)="addPhotoToGallery()">
+        <ion-icon name="camera"></ion-icon>
+      </ion-fab-button>
+    </div>
+  </ion-item>
+  
+
   <ion-button expand="full" (click)="register()">Cadastrar</ion-button>
+
+  <p class="login-message"><a (click)="navigateToLogin()">Ja possuo cadastro</a></p>
 </ion-content>
