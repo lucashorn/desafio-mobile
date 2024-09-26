@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +12,11 @@ export class LoginPage {
   username: string = '';
   password: string = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router, 
+    private toastController: ToastController
+  ) {}
 
   login() {
     if (this.username && this.password) {
@@ -20,11 +25,20 @@ export class LoginPage {
         localStorage.setItem('loggedIn', 'true');
         this.router.navigate(['/menu']);
       } else {
-        alert('Usuário ou senha incorretos!');
-      }
+        this.presentToast('Usuário ou senha incorretos!');      }
     } else {
-      alert('Por favor, preencha todos os campos.');
+      this.presentToast('Por favor, preencha todos os campos.');
     }
+  }
+
+  async presentToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 4000,
+      position: 'top',
+      color: 'danger',
+    });
+    toast.present();
   }
 
   navigateToSignup() {
