@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PhotoService, UserPhoto } from '../services/photo.service';
+import { UserService } from '../services/user.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-fotos',
@@ -10,8 +12,14 @@ export class FotosPage implements OnInit {
   public likes: { [key: number]: number } = {};
   public showComments: { [key: number]: boolean } = {};
   public newComment: { [key: number]: string } = {};
+  user: any;
+  savedImage: any;
 
-  constructor(public photoService: PhotoService) {
+  constructor(
+    public photoService: PhotoService,
+    private userService: UserService,
+    private authService: AuthService,
+  ) {
     this.photoService.photos.forEach((photo, index) => {
       this.likes[index] = 0;
       this.showComments[index] = false;
@@ -21,6 +29,14 @@ export class FotosPage implements OnInit {
 
   async ngOnInit() {
     await this.photoService.loadSaved();
+    this.userService.getUser().subscribe(user => {      
+      this.user = user;
+      this.updateProfileImage();
+    });
+  }
+
+  private updateProfileImage() {
+    this.savedImage = this.user?.profileImage || 'assets/icon/user.png';
   }
 
   public showActionSheet(photo: UserPhoto, position: number) {
@@ -64,5 +80,9 @@ export class FotosPage implements OnInit {
       // Atualiza a foto no serviço
       await this.photoService.updatePhoto(photo);
     }
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

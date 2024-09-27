@@ -1,6 +1,21 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Fotos</ion-title>
+    <ion-buttons slot="end">
+      <ion-item lines="none">
+        <div class="header-content">          
+          <div class="greeting-message">
+            Olá {{ user?.apelido || 'Usuário' }}
+          </div>
+          <div class="profile-image-container">
+            <div class="profile-image-preview">
+              <img [src]="savedImage || 'assets/icon/user.png'" />
+            </div>
+          </div>
+          <ion-icon name="log-out-outline" class="logout-icon" (click)="logout()"></ion-icon>
+        </div>
+      </ion-item>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 

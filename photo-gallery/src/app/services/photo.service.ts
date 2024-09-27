@@ -64,8 +64,6 @@ export class PhotoService {
       if (saveTemporary)
         this.temporaryPhotos.push(savedImageFile);
 
-      console.log('Foto capturada e armazenada temporariamente:', savedImageFile);
-
       return savedImageFile;
     } catch (error) {
       console.error('Erro ao capturar a foto:', error);
@@ -116,34 +114,34 @@ export class PhotoService {
     }
   }
 
-  private async readAsBase64(photo: Photo): Promise<string> {
-    if (this.platform.is('hybrid')) {
-      const file = await Filesystem.readFile({
-        path: photo.path!
-      });
-
-      if (typeof file.data === 'string') {
-        return file.data;
-      } else {
-        throw new Error('Dados lidos não são do tipo string');
-      }
-    } else {
-      const response = await fetch(photo.webPath!);
+  public async readAsBase64(photo: Photo | UserPhoto): Promise<string> {
+    let webPath: string | undefined;
+  
+    if ('webPath' in photo) {
+      // Se for do tipo 'Photo'
+      webPath = photo.webPath;
+    } else if ('webviewPath' in photo) {
+      // Se for do tipo 'UserPhoto'
+      webPath = photo.webviewPath;
+    }
+  
+    if (webPath) {
+      const response = await fetch(webPath);
       const blob = await response.blob();
       return await this.convertBlobToBase64(blob);
     }
+  
+    return ''; // Retorna uma string vazia se não houver um webPath válido
   }
 
-  private convertBlobToBase64(blob: Blob): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-      reader.readAsDataURL(blob);
-    });
-  }
+  private convertBlobToBase64 = (blob: Blob) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      resolve(reader.result as string);
+    };
+    reader.readAsDataURL(blob);
+  });
 
   public async loadSaved() {
     const { value } = await Preferences.get({ key: this.PHOTO_STORAGE });
@@ -161,6 +159,14 @@ export class PhotoService {
 
     this.photos.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
 
+  }
+
+  public async getImage(filepath: string) {
+    const readFile = await Filesystem.readFile({
+      path: filepath,
+      directory: Directory.Data
+    });
+    return `data:image/jpeg;base64,${readFile.data}`;
   }
 
   public async deletePicture(photo: UserPhoto, position: number) {

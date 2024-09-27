@@ -16,14 +16,15 @@ export class SignupPage {
 
   constructor(
     private router: Router, 
-    private photoService: PhotoService,
-    private toastController: ToastController
+    private photoService: PhotoService,    
+    private toastController: ToastController,    
   ) {}
 
   async addPhotoToGallery() {
     try {
       const photo = await this.photoService.capturePhoto(false);
-      this.profileImage = photo.webviewPath;
+      const base64Image = await this.photoService.readAsBase64(photo); // Agora, o tipo correto
+      this.profileImage = base64Image; // Armazena em base64
     } catch (error) {
       this.showAlert('Erro ao capturar a foto.');
     }
@@ -33,23 +34,28 @@ export class SignupPage {
     if (this.username && this.password && this.apelido) {
       const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
       const userExists = existingUsers.some((user: any) => user.username === this.username);
-
+  
       if (userExists) {
         await this.presentToast('Usuário já existe!', 'danger');
         return;
       }
-
-      existingUsers.push({ username: this.username, password: this.password, profileImage: this.profileImage });
+  
+      // Adiciona o usuário ao array com a imagem de perfil em base64
+      existingUsers.push({
+        username: this.username,
+        password: this.password,
+        apelido: this.apelido,
+        profileImage: this.profileImage
+      });
       localStorage.setItem('users', JSON.stringify(existingUsers));
-
-       // Limpa os campos do formulário
-       this.username = '';
-       this.password = '';
-       this.apelido = '';
-       this.profileImage = undefined;
- 
-       await this.presentToast('Cadastro realizado com sucesso!');
-
+  
+      // Limpa os campos do formulário
+      this.username = '';
+      this.password = '';
+      this.apelido = '';
+      this.profileImage = undefined;
+  
+      await this.presentToast('Cadastro realizado com sucesso!');
       this.router.navigate(['/login']);
     } else {
       await this.presentToast('Por favor, preencha todos os campos.', 'danger');

@@ -22,7 +22,6 @@ export class LoginPage {
     if (this.username && this.password) {
       const success = this.authService.login(this.username, this.password);
       if (success) {
-        localStorage.setItem('loggedIn', 'true');
         this.router.navigate(['/menu']);
       } else {
         this.presentToast('Usuário ou senha incorretos!');      }
