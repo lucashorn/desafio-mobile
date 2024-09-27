@@ -37,6 +37,31 @@
 @import "@ionic/angular/css/palettes/dark.system.css";
 
 
+.image-upload-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.profile-image-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+}
+
+.profile-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .header-content {
   display: flex;
   align-items: center;
@@ -47,26 +72,12 @@
 .profile-image-container {
   display: flex;
   align-items: center;
-  margin-right: 10px; 
-}
-
-.profile-image-preview {
-  width: 40px; 
-  height: 40px; 
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: #f0f0f0;
-}
-
-.profile-image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  margin-right: 5px; 
 }
 
 .greeting-message {
   margin-left: 10px;
   font-size: 16px;
   color: #faf1f1;
-  margin-right: 5px;
+  margin-right: 15px;
 }
