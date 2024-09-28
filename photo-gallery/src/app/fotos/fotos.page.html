@@ -1,23 +1,4 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Fotos</ion-title>
-    <ion-buttons slot="end">
-      <ion-item lines="none">
-        <div class="header-content">          
-          <div class="greeting-message">
-            Olá <b>{{ user?.apelido || 'Usuário' }}</b>.
-          </div>
-          <div class="profile-image-container">
-            <div class="profile-image-preview">
-              <img [src]="savedImage || 'assets/icon/user.png'" />
-            </div>
-          </div>
-          <ion-icon name="log-out-outline" class="logout-icon" (click)="logout()"></ion-icon>
-        </div>
-      </ion-item>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<app-header headerName="Fotos"/>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
@@ -59,8 +40,8 @@
             <ion-button expand="block" size="small" (click)="addComment(position)">Adicionar Comentário</ion-button>
 
             <ion-list *ngIf="photo.comments && photo.comments.length > 0">
-              <ion-item *ngFor="let comment of photo.comments">
-                <ion-label>{{ comment }}</ion-label>
+              <ion-item *ngFor="let comment of photo.comments; index as position">
+                <ion-label (click)="showActionSheet(photo, position)">{{ comment }}</ion-label>
               </ion-item>
             </ion-list>
           </div>

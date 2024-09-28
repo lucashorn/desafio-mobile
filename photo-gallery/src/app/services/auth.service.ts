@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('sb-slbespgvkdhwxlqgbuvo-auth-token');
     this.router.navigate(['/login']);
   }
 

@@ -6,6 +6,7 @@ import { MenuPage } from './menu.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
 
 import { MenuPageRoutingModule } from './menu-routing.module';
+import { HeaderModule } from '../header/header.module';
 
 @NgModule({
   imports: [
@@ -13,7 +14,8 @@ import { MenuPageRoutingModule } from './menu-routing.module';
     CommonModule,
     FormsModule,
     ExploreContainerComponentModule,
-    MenuPageRoutingModule
+    MenuPageRoutingModule,
+    HeaderModule
   ],
   declarations: [MenuPage]
 })

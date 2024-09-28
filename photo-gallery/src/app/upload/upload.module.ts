@@ -6,6 +6,7 @@ import { UploadPage } from './upload.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
 
 import { UploadPageRoutingModule } from './upload-routing.module';
+import { HeaderModule } from '../header/header.module';
 
 @NgModule({
   imports: [
@@ -13,7 +14,8 @@ import { UploadPageRoutingModule } from './upload-routing.module';
     CommonModule,
     FormsModule,
     ExploreContainerComponentModule,
-    UploadPageRoutingModule
+    UploadPageRoutingModule,
+    HeaderModule
   ],
   declarations: [UploadPage]
 })

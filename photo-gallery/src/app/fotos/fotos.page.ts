@@ -28,6 +28,7 @@ export class FotosPage implements OnInit {
   }
 
   async ngOnInit() {
+    console.log('init')
     await this.photoService.loadSaved();
     this.userService.getUser().subscribe(user => {      
       this.user = user;

@@ -4,6 +4,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 import { ActionSheetController, Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
+import { SupabaseService } from './supabase.service';
 
 export interface UserPhoto {
   filepath: string;
@@ -22,21 +23,31 @@ export class PhotoService {
   private platform: Platform;
   public temporaryPhotos: UserPhoto[] = [];
 
-  constructor(private actionSheetController: ActionSheetController, platform: Platform) {
+  constructor(private actionSheetController: ActionSheetController, platform: Platform, private supabase: SupabaseService) {
     this.platform = platform;
   }
 
   public async showActionSheet(photo: UserPhoto, position: number) {
     const actionSheet = await this.actionSheetController.create({
       header: 'Fotos',
-      buttons: [{
+      buttons: [
+      {
         text: 'Delete',
         role: 'destructive',
         icon: 'trash',
         handler: () => {
           this.deletePicture(photo, position);
         }
-      }, {
+      },
+      // {
+      //   text: 'Download',
+      //   role: 'destructive',
+      //   icon: 'download',
+      //   handler: () => {
+          
+      //   }
+      // },
+      {
         text: 'Cancel',
         icon: 'close',
         role: 'cancel',
@@ -54,7 +65,7 @@ export class PhotoService {
         source: CameraSource.Camera,
         quality: 100
       });
-
+      console.log(capturedPhoto)
       const savedImageFile = await this.savePicture(capturedPhoto);
       savedImageFile.timestamp = Date.now();
       savedImageFile.likes = 0;
@@ -96,7 +107,7 @@ export class PhotoService {
     const base64Data = await this.readAsBase64(photo);
     const fileName = Date.now() + '.jpeg';
     const savedFile = await Filesystem.writeFile({
-      path: fileName,
+      path: `${fileName}`,
       data: base64Data,
       directory: Directory.Data
     });
@@ -144,6 +155,9 @@ export class PhotoService {
   });
 
   public async loadSaved() {
+    // const response = await this.supabase.listBuckets()
+    // console.log(response)
+
     const { value } = await Preferences.get({ key: this.PHOTO_STORAGE });
     this.photos = (value ? JSON.parse(value) : []) as UserPhoto[];
 
@@ -154,6 +168,7 @@ export class PhotoService {
           directory: Directory.Data
         });
         photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+        console.log(photo.filepath, Directory.Data)
       }
     }
 
@@ -176,6 +191,8 @@ export class PhotoService {
       key: this.PHOTO_STORAGE,
       value: JSON.stringify(this.photos)
     });
+
+    console.log(this.photos)
 
     const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
 

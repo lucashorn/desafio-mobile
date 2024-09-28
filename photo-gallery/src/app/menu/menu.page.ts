@@ -3,7 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 
 @Component({
-  selector: 'app-Menu',
+  selector: 'app-menu',
   templateUrl: 'Menu.page.html',
   styleUrls: ['Menu.page.scss']
 })

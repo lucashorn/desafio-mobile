@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { SupabaseService } from '../services/supabase.service';
 
 @Component({
   selector: 'app-login',
@@ -13,18 +14,20 @@ export class LoginPage {
   password: string = '';
 
   constructor(
-    private authService: AuthService, 
     private router: Router, 
-    private toastController: ToastController
+    private toastController: ToastController,
+    private supabase: SupabaseService
   ) {}
 
-  login() {
+  async login() {
     if (this.username && this.password) {
-      const success = this.authService.login(this.username, this.password);
-      if (success) {
+      const response = await this.supabase.signIn(this.username, this.password)
+      
+      if (!response.error) {
         this.router.navigate(['/menu']);
       } else {
-        this.presentToast('Usuário ou senha incorretos!');      }
+        this.presentToast('Usuário ou senha incorretos!');
+      }
     } else {
       this.presentToast('Por favor, preencha todos os campos.');
     }

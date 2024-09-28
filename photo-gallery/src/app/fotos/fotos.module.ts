@@ -6,6 +6,7 @@ import { FotosPage } from './fotos.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
 
 import { FotosPageRoutingModule } from './fotos-routing.module';
+import { HeaderModule } from '../header/header.module';
 
 @NgModule({
   imports: [
@@ -13,7 +14,8 @@ import { FotosPageRoutingModule } from './fotos-routing.module';
     CommonModule,
     FormsModule,
     ExploreContainerComponentModule,
-    FotosPageRoutingModule
+    FotosPageRoutingModule,
+    HeaderModule
   ],
   declarations: [FotosPage]
 })
