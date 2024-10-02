@@ -1,30 +1,32 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 import { ActionSheetController, Platform } from '@ionic/angular';
-import { Capacitor } from '@capacitor/core';
 import { SupabaseService } from './supabase.service';
+import { UserService } from './user.service';
 
 export interface UserPhoto {
+  id?: string,
   filepath: string;
-  webviewPath?: string;
+  dataUrl?: string;
+  format: string;
   timestamp?: number;
   likes?: number;
   liked?: boolean;
-  comments?: string[];
+  comments?: any[];
 }
 @Injectable({
   providedIn: 'root'
 })
-export class PhotoService {
+export class PhotoService{
   public photos: UserPhoto[] = [];
-  private PHOTO_STORAGE: string = 'photos';
-  private platform: Platform;
   public temporaryPhotos: UserPhoto[] = [];
 
-  constructor(private actionSheetController: ActionSheetController, platform: Platform, private supabase: SupabaseService) {
-    this.platform = platform;
+  user: any;
+
+  constructor(private actionSheetController: ActionSheetController, private supabase: SupabaseService, private userService: UserService) {
+    this.user = this.userService.getUser();
   }
 
   public async showActionSheet(photo: UserPhoto, position: number) {
@@ -58,14 +60,27 @@ export class PhotoService {
     await actionSheet.present();
   }
 
-  public async capturePhoto(saveTemporary = true): Promise<UserPhoto> {
+  public async captureProfilePhoto() : Promise<Photo> {
     try {
       const capturedPhoto = await Camera.getPhoto({
-        resultType: CameraResultType.Uri,
+        resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera,
         quality: 100
       });
-      console.log(capturedPhoto)
+      return capturedPhoto
+    } catch (error) {
+      console.error('Erro ao capturar a foto:', error);
+      throw error;
+    }
+  }
+
+  public async capturePhoto(saveTemporary = true): Promise<UserPhoto> {
+    try {
+      const capturedPhoto = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        quality: 100
+      });
       const savedImageFile = await this.savePicture(capturedPhoto);
       savedImageFile.timestamp = Date.now();
       savedImageFile.likes = 0;
@@ -84,18 +99,13 @@ export class PhotoService {
 
   public async confirmAllPhotos() {
     // Adiciona todas as fotos temporárias à galeria permanente
-    this.photos.push(...this.temporaryPhotos);
-
-    await Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos),
-    });
+    this.temporaryPhotos.forEach(async (photo) => {
+      const folder = 'UploadedPhotos'
+      await this.supabase.uploadImageStorage(photo, folder).then(() => this.loadSaved())
+    })
 
     // Limpa a lista de fotos temporárias
     this.temporaryPhotos = [];
-
-    this.photos.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
-
   }
 
   public async discardAllPhotos() {
@@ -104,95 +114,46 @@ export class PhotoService {
   }
 
   private async savePicture(photo: Photo): Promise<UserPhoto> {
-    const base64Data = await this.readAsBase64(photo);
-    const fileName = Date.now() + '.jpeg';
-    const savedFile = await Filesystem.writeFile({
-      path: `${fileName}`,
-      data: base64Data,
-      directory: Directory.Data
-    });
+    const fileName = Date.now().toString();
 
-    if (this.platform.is('hybrid')) {
-      return {
-        filepath: savedFile.uri,
-        webviewPath: Capacitor.convertFileSrc(savedFile.uri),
-      };
-    } else {
-      return {
-        filepath: fileName,
-        webviewPath: photo.webPath
-      };
-    }
-  }
-
-  public async readAsBase64(photo: Photo | UserPhoto): Promise<string> {
-    let webPath: string | undefined;
-  
-    if ('webPath' in photo) {
-      // Se for do tipo 'Photo'
-      webPath = photo.webPath;
-    } else if ('webviewPath' in photo) {
-      // Se for do tipo 'UserPhoto'
-      webPath = photo.webviewPath;
-    }
-  
-    if (webPath) {
-      const response = await fetch(webPath);
-      const blob = await response.blob();
-      return await this.convertBlobToBase64(blob);
-    }
-  
-    return ''; // Retorna uma string vazia se não houver um webPath válido
-  }
-
-  private convertBlobToBase64 = (blob: Blob) => new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = () => {
-      resolve(reader.result as string);
+    return {
+      filepath: fileName,
+      dataUrl: photo.dataUrl,
+      format: photo.format,
     };
-    reader.readAsDataURL(blob);
-  });
+  }
 
   public async loadSaved() {
-    // const response = await this.supabase.listBuckets()
-    // console.log(response)
+    const loadedPhotos: UserPhoto[] = [];
+    const { data } = await this.supabase.listImagesInFolder('UploadedPhotos')
 
-    const { value } = await Preferences.get({ key: this.PHOTO_STORAGE });
-    this.photos = (value ? JSON.parse(value) : []) as UserPhoto[];
-
-    if (!this.platform.is('hybrid')) {
-      for (let photo of this.photos) {
-        const readFile = await Filesystem.readFile({
-          path: photo.filepath,
-          directory: Directory.Data
-        });
-        photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
-        console.log(photo.filepath, Directory.Data)
+    for(const image of data!){
+      if(image.name != ".emptyFolderPlaceholder"){
+        const imageBlob = await this.supabase.downLoadImage(`UploadedPhotos/${image.name}`)
+        const imageUrl = URL.createObjectURL(imageBlob.data!)
+        const imageComments = await this.supabase.getCommentsByImageId(image.id)
+        const imageLikes = (await this.supabase.getLikesByImageId(image.id)).data!
+        const isLiked = imageLikes.some(like => like.usuario_id == this.user.id)
+        const photo: UserPhoto = {
+          id: image.id,
+          filepath: image.name,
+          dataUrl: imageUrl,
+          format: image.metadata['mimetype'],
+          comments: imageComments ? imageComments : [],
+          likes: imageLikes.length,
+          liked: isLiked
+        }
+        loadedPhotos.push(photo)
       }
     }
+    this.photos = [...loadedPhotos]
 
     this.photos.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
 
   }
 
-  public async getImage(filepath: string) {
-    const readFile = await Filesystem.readFile({
-      path: filepath,
-      directory: Directory.Data
-    });
-    return `data:image/jpeg;base64,${readFile.data}`;
-  }
-
   public async deletePicture(photo: UserPhoto, position: number) {
     this.photos.splice(position, 1);
-
-    await Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos)
-    });
-
-    console.log(this.photos)
 
     const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
 
@@ -203,17 +164,6 @@ export class PhotoService {
       });
     } catch (error) {
       console.error('Erro ao excluir o arquivo', error);
-    }
-  }
-
-  public async updatePhoto(photo: UserPhoto) {
-    const index = this.photos.findIndex(p => p.filepath === photo.filepath);
-    if (index > -1) {
-      this.photos[index] = photo;
-      await Preferences.set({
-        key: this.PHOTO_STORAGE,
-        value: JSON.stringify(this.photos)
-      });
     }
   }
 }

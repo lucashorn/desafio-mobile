@@ -1,26 +1,37 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private userSubject = new BehaviorSubject<any>(this.getUserFromStorage());
+  private user: any;
 
-  constructor() {
-    this.userSubject.next(this.getUserFromStorage());
+  constructor(private supabase: SupabaseService) {
+    this.user = this.getUserFromStorage();
   }
 
-  getUser(): Observable<any> {
-    return this.userSubject.asObservable();
+  getUser() {
+    this.user = this.getUserFromStorage();
+
+    return this.user;
   }
 
-  private getUserFromStorage(): any {
-    return JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-  }
+  private getUserFromStorage() {
+    const userMetadata = JSON.parse(localStorage.getItem('sb-slbespgvkdhwxlqgbuvo-auth-token') || '{}').user.user_metadata;
+    let imageUrl = ''
+    if(userMetadata.profileImage){ 
+      const profileImage = userMetadata.profileImage
+      this.supabase.downLoadImage(`ProfileImages/${profileImage}`).then(image => {
+        this.user.profileImage = URL.createObjectURL(image.data!)
+      })
+    }
 
-  updateUser(user: any) {
-    localStorage.setItem('loggedInUser', JSON.stringify(user));
-    this.userSubject.next(user);
+    return {
+      id: userMetadata.sub, 
+      apelido: userMetadata.apelido,
+      email: userMetadata.email,
+      profileImage: imageUrl
+    };
   }
 }

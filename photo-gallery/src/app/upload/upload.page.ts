@@ -8,27 +8,12 @@ import { AuthService } from '../services/auth.service';
   templateUrl: 'upload.page.html',
   styleUrls: ['upload.page.scss']
 })
-export class UploadPage implements OnInit {
-
-  user: any;
-  savedImage: any;
+export class UploadPage {
 
   constructor(
     public photoService: PhotoService,
-    private userService: UserService,
-    private authService: AuthService
+    private userService: UserService
   ) {}
-
-  ngOnInit() {
-    this.userService.getUser().subscribe(user => {      
-      this.user = user;
-      this.updateProfileImage();
-    });
-  }
-
-  private updateProfileImage() {
-    this.savedImage = this.user?.profileImage || 'assets/icon/user.png';
-  }
 
   async addPhotoToGallery() {
     await this.photoService.capturePhoto();
@@ -44,9 +29,5 @@ export class UploadPage implements OnInit {
 
   get hasTemporaryPhotos() {
     return this.photoService.temporaryPhotos.length > 0;
-  }
-
-  logout() {
-    this.authService.logout();
   }
 }

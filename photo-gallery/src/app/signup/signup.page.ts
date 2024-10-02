@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { PhotoService } from '../services/photo.service';
 import { ToastController } from '@ionic/angular';
-import { SupabaseService, User } from '../services/supabase.service';
+import { SupabaseService, UserRegister } from '../services/supabase.service';
+import { Photo } from '@capacitor/camera';
 
 @Component({
   selector: 'app-signup',
@@ -10,11 +11,12 @@ import { SupabaseService, User } from '../services/supabase.service';
   styleUrls: ['./signup.page.scss'],
 })
 export class SignupPage {
-  user: User = {
+  user: UserRegister = {
     username: '',
     password: '',
-    apelido: ''
+    apelido: '',
   }
+  userPhoto: Photo | undefined;
 
   constructor(
     private router: Router, 
@@ -24,29 +26,28 @@ export class SignupPage {
   ) {}
 
   async addPhotoToGallery() {
-    try {
-      const photo = await this.photoService.capturePhoto(false);
-      const base64Image = await this.photoService.readAsBase64(photo); // Agora, o tipo correto
-      this.user.profileImage = base64Image; // Armazena em base64
-    } catch (error) {
-      this.showAlert('Erro ao capturar a foto.');
-    }
+    this.userPhoto = await this.photoService.captureProfilePhoto();
   }
   
 
   async register() {
     if (this.user.username && this.user.password && this.user.apelido) {
-      const response = await this.supabase.signUp(this.user.username, this.user.password, this.user.apelido)
+      if(this.userPhoto){
+        const filename = `${this.user.username.split('@')[0]}.${this.userPhoto.format}`
+        this.user.profileImage = filename + Date.now().toString();
 
-      console.log(response)
-
+        await this.supabase.signUp(this.user.username, this.user.password, this.user.apelido, this.user.profileImage)
+        await this.supabase.uploadProfileImageStorage(this.userPhoto, filename)
+      } else{
+        await this.supabase.signUp(this.user.username, this.user.password, this.user.apelido)
+      }
        // Limpa os campos do formulário
-       this.user.username = '';
-       this.user.password = '';
-       this.user.apelido = '';
-       this.user.profileImage = undefined;
+      this.user.username = '';
+      this.user.password = '';
+      this.user.apelido = '';
+      this.user.profileImage = undefined;
  
-       await this.presentToast('Cadastro realizado com sucesso!');
+      await this.presentToast('Cadastro realizado com sucesso!');
 
       this.router.navigate(['/login']);
     } else {

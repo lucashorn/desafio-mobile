@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { AuthChangeEvent, Session, SupabaseClient, createClient } from '@supabase/supabase-js'
 import { environment } from 'src/environments/environment';
+import { UserPhoto } from './photo.service';
+import { Photo } from '@capacitor/camera';
 
-export interface User {
+export interface UserRegister {
   username: string
   password: string
   apelido: string
@@ -16,23 +18,31 @@ export interface User {
 export class SupabaseService {
   private supabase: SupabaseClient
   private galleryImagesBucket;
-  // private supabaseAdmin: SupabaseClient
-  private supabaseStorage = "https://slbespgvkdhwxlqgbuvo.supabase.co/storage/v1/object/public/ingredients"
-  constructor(
-    private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
-  ) { 
+  private supabaseAdmin: SupabaseClient
+  constructor() { 
     // cria o link com o cliente supabase
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey)
 
     // cria um shortcut para o bucket
-    this.galleryImagesBucket = this.supabase.storage.from('gallery-images') 
-    // this.supabaseAdmin = createClient(environment.supabaseUrl, environment.serviceRoleKey)
+    this.supabaseAdmin = createClient(environment.supabaseUrl, environment.serviceRoleKey)
+    this.galleryImagesBucket = this.supabaseAdmin.storage.from('gallery-images')
   }
 
   // busca o usuário logado
-  loggedUser() {
+  getUser() {
     return this.supabase.auth.getUser().then(({ data }) => data?.user)
+  }
+
+  async getUserById(id: string){
+    const response = await this.supabaseAdmin.auth.admin.getUserById(id)
+
+    const userMetadata = response.data.user?.user_metadata!
+    
+    return {
+      id,
+      apelido: userMetadata['apelido'],
+      profileImage: userMetadata['profileImage'],
+    }
   }
 
   // busca a sessão do usuário logado
@@ -42,21 +52,19 @@ export class SupabaseService {
 
   // Fica observando alterações no estado de autenticação do usuário logado
   authChanges() {
-    return this.supabase.auth.onAuthStateChange((event, session) => {
-      console.log(event, session)
-    })
+    return this.supabase.auth.onAuthStateChange((event, session) => {})
   }
 
   // Cria o usuário
   signUp(email: string, password: string, apelido: string, profileImage?: string) {
     return this.supabase.auth.signUp(
-      { 
+      {
         email, 
         password, 
         options: {
           data: {
-            profileImage,
-            apelido
+            apelido,
+            profileImage
           }
         } 
       })
@@ -72,32 +80,8 @@ export class SupabaseService {
     return this.supabase.auth.signOut()
   }
 
-  // async updateProfile(profile: User) {
-  //   const user = await this.loggedUser
-  //   const update = {
-  //     ...profile,
-  //     id: user?.id,
-  //     updated_at: new Date(),
-  //   }
-
-  //   return this.supabase.from('profiles').upsert(update)
-  // }
-
-  // downLoadImage(path: string) {
-  //   return this.supabase.storage.from('avatars').download(path)
-  // }
-
-  // uploadAvatar(filePath: string, file: File) {
-  //   return this.supabase.storage.from('avatars').upload(filePath, file)
-  // }
-
-  async createNotice(message: string) {
-    const toast = await this.toastCtrl.create({ message, duration: 5000 })
-    await toast.present()
-  }
-
-  createLoader() {
-    return this.loadingCtrl.create()
+  downLoadImage(path: string) {
+    return this.galleryImagesBucket.download(path)
   }
 
   //lista a pasta raiz do bucket
@@ -110,13 +94,58 @@ export class SupabaseService {
     return this.galleryImagesBucket.list(folder)
   }
 
+  async uploadProfileImageStorage(photo: Photo, filename: string){
+    const file = await fetch(photo.dataUrl!)
+    .then((res)=> res.blob())
+    .then((blob) => new File([blob], filename, {type: `image/${photo.format}`}))
+
+    return this.galleryImagesBucket.upload(`ProfileImages/${filename}`, file, {contentType: file.type})
+  }
+
   //Faz upload para o bucket passando o nome da imagem, a pasta e o objeto da imagem
-  uploadImage(imageName: string, folder: string, file: string | File | Blob){
-    return this.galleryImagesBucket.upload(`${folder}/${imageName}.png`, file)
+  async uploadImageStorage(photo: UserPhoto, folder: string){
+    const file = await fetch(photo.dataUrl!)
+    .then((res)=> res.blob())
+    .then((blob) => new File([blob], photo.filepath, {type: `image/${photo.format}`}))
+
+    return this.galleryImagesBucket.upload(`${folder}/${photo.filepath}.${photo.format}`, file, {contentType: file.type})
   }
 
   //busca uma imagem especifica
   downloadImage(imageName: string, folder: string){
-    return this.galleryImagesBucket.download(`${folder}/${imageName}.png`)
+    return this.galleryImagesBucket.download(`${folder}/${imageName}`)
+  }
+
+  emptyBucket(){
+    return this.supabase.storage.emptyBucket('gallery-images')
+  }
+
+  async insertComment(content: string, imageId: string){
+    const userId = await this.getUser().then(user => user?.id)
+    if(!userId){
+      return
+    }
+    await this.supabase.from('comentarios').insert({conteudo: content, imagem_id: imageId, usuario_id: userId})
+  }
+
+  async getCommentsByImageId(imageId: string){
+    return (await this.supabase.from('comentarios').select().eq('imagem_id', imageId)).data!
+  }
+
+  async toggleLikeOnPhoto(liked: boolean, imageId: string){
+    const userId = await this.getUser().then(user => user?.id)
+    if(!userId){
+      return
+    }
+    if(!liked){
+      await this.supabase.from('curtidas').insert({imagem_id: imageId, usuario_id: userId})
+    }
+    else{
+      await this.supabase.from('curtidas').delete().eq('usuario_id', userId).eq('imagem_id', imageId)
+    }
+  }
+  
+  async getLikesByImageId(imageId: string) {
+    return (await this.supabase.from('curtidas').select().eq('imagem_id', imageId))
   }
 }

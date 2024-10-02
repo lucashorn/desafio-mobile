@@ -24,7 +24,7 @@
     <ion-label>Imagem de Perfil</ion-label>
     <div class="image-upload-container">
       <div class="profile-image-preview">
-        <img [src]="user.profileImage || 'assets/icon/user.png'" />
+        <img [src]="userPhoto?.dataUrl || 'assets/icon/user.png'" />
       </div>
       <ion-fab-button (click)="addPhotoToGallery()">
         <ion-icon name="camera"></ion-icon>

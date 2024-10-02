@@ -2,7 +2,19 @@
   <ion-toolbar>
     <ion-title>{{ headerName }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="logout()">Logout</ion-button>
+      <ion-item lines="none">
+        <div class="header-content">          
+          <div class="greeting-message">
+            Olá <b>{{ user?.apelido || 'Usuário' }}</b>.
+          </div>
+          <div class="profile-image-container">
+            <div class="profile-image-preview">
+              <img [src]="user?.profileImage || 'assets/icon/user.png'" />
+            </div>
+          </div>
+          <ion-icon name="log-out-outline" class="logout-icon" (click)="logout()"></ion-icon>
+        </div>
+      </ion-item>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>

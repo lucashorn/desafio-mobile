@@ -11,7 +11,7 @@
     <ion-row>
       <ion-col size="12" *ngFor="let photo of photoService.photos; index as position" style="margin-bottom: 16px;">
 
-        <ion-img [src]="photo.webviewPath" (click)="showActionSheet(photo, position)" style="width: 100%;"></ion-img>
+        <ion-img [src]="photo.dataUrl" (click)="showActionSheet(photo, position)" style="width: 100%;"></ion-img>
 
 
         <ion-footer class="photo-footer">
@@ -20,7 +20,7 @@
             <ion-col size="12">
               <div class="button-container">
 
-                <ion-button class="action_button" fill="clear" color="danger" size="small" (click)="toggleLike(position)">
+                <ion-button class="action_button" fill="clear" color="danger" size="small" (click)="toggleLike(photo.id!, photo.liked!)">
                   <ion-icon [name]="photo.liked ? 'heart' : 'heart-outline'"></ion-icon>
                   <span>  {{ photo.likes || 0 }}</span>
                 </ion-button>
@@ -37,11 +37,11 @@
             <ion-item>
               <ion-input [(ngModel)]="newComment[position]" placeholder="Digite seu comentário"></ion-input>
             </ion-item>
-            <ion-button expand="block" size="small" (click)="addComment(position)">Adicionar Comentário</ion-button>
+            <ion-button expand="block" size="small" (click)="addComment(photo.id!, position)">Adicionar Comentário</ion-button>
 
             <ion-list *ngIf="photo.comments && photo.comments.length > 0">
               <ion-item *ngFor="let comment of photo.comments; index as position">
-                <ion-label (click)="showActionSheet(photo, position)">{{ comment }}</ion-label>
+                <ion-label (click)="showActionSheet(photo, position)">{{ comment['conteudo'] }}</ion-label>
               </ion-item>
             </ion-list>
           </div>

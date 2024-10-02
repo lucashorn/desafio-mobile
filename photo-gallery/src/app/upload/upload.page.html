@@ -34,7 +34,7 @@
   <ion-grid>
     <ion-row>
       <ion-col size="6" *ngFor="let photo of photoService.temporaryPhotos">
-        <ion-img [src]="photo.webviewPath"></ion-img>
+        <ion-img [src]="photo.dataUrl"></ion-img>
       </ion-col>
     </ion-row>
   </ion-grid>
