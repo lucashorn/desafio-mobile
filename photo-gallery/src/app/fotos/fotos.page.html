@@ -11,7 +11,7 @@
     <ion-row>
       <ion-col size="12" *ngFor="let photo of photoService.photos; index as position" style="margin-bottom: 16px;">
 
-        <ion-img [src]="photo.dataUrl" (click)="showActionSheet(photo, position)" style="width: 100%;"></ion-img>
+        <ion-img [src]="photo.dataUrl" style="width: 100%;"></ion-img>
 
 
         <ion-footer class="photo-footer">
@@ -41,7 +41,7 @@
 
             <ion-list *ngIf="photo.comments && photo.comments.length > 0">
               <ion-item *ngFor="let comment of photo.comments; index as position">
-                <ion-label (click)="showActionSheet(photo, position)">{{ comment['conteudo'] }}</ion-label>
+                <ion-label>{{ comment['conteudo'] }}</ion-label>
               </ion-item>
             </ion-list>
           </div>
