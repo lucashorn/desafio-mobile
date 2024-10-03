@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { PhotoService, UserPhoto } from '../services/photo.service';
-import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
 import { SupabaseService } from '../services/supabase.service';
 

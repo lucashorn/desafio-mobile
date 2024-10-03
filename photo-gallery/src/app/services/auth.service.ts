@@ -19,6 +19,10 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('sb-slbespgvkdhwxlqgbuvo-auth-token');
+    const user = JSON.parse(localStorage.getItem('sb-slbespgvkdhwxlqgbuvo-auth-token') || '{}').user;
+    if(user){
+      return true;
+    }
+    return false;
   }
 }

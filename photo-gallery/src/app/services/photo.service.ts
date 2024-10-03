@@ -1,8 +1,7 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Preferences } from '@capacitor/preferences';
-import { ActionSheetController, Platform } from '@ionic/angular';
+import { ActionSheetController } from '@ionic/angular';
 import { SupabaseService } from './supabase.service';
 import { UserService } from './user.service';
 

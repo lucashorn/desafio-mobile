@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { PhotoService } from '../services/photo.service';
 import { UserService } from '../services/user.service';
-import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-upload',

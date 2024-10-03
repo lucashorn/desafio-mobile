@@ -33,8 +33,8 @@ export class SignupPage {
   async register() {
     if (this.user.username && this.user.password && this.user.apelido) {
       if(this.userPhoto){
-        const filename = `${this.user.username.split('@')[0]}.${this.userPhoto.format}`
-        this.user.profileImage = filename + Date.now().toString();
+        const filename = `${this.user.username.split('@')[0] + Date.now().toString()}.${this.userPhoto.format}`
+        this.user.profileImage = filename;
 
         await this.supabase.signUp(this.user.username, this.user.password, this.user.apelido, this.user.profileImage)
         await this.supabase.uploadProfileImageStorage(this.userPhoto, filename)
