@@ -18,36 +18,17 @@ export interface UserRegister {
 export class SupabaseService {
   private supabase: SupabaseClient
   private galleryImagesBucket;
-  private supabaseAdmin: SupabaseClient
   constructor() { 
     // cria o link com o cliente supabase
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey)
 
     // cria um shortcut para o bucket
-    this.supabaseAdmin = createClient(environment.supabaseUrl, environment.serviceRoleKey)
-    this.galleryImagesBucket = this.supabaseAdmin.storage.from('gallery-images')
+    this.galleryImagesBucket = this.supabase.storage.from('gallery-images')
   }
 
   // busca o usuário logado
   getUser() {
     return this.supabase.auth.getUser().then(({ data }) => data?.user)
-  }
-
-  async getUserById(id: string){
-    const response = await this.supabaseAdmin.auth.admin.getUserById(id)
-
-    const userMetadata = response.data.user?.user_metadata!
-    
-    return {
-      id,
-      apelido: userMetadata['apelido'],
-      profileImage: userMetadata['profileImage'],
-    }
-  }
-
-  // busca a sessão do usuário logado
-  session() {
-    return this.supabase.auth.getSession().then(({ data }) => data?.session)
   }
 
   // Fica observando alterações no estado de autenticação do usuário logado
