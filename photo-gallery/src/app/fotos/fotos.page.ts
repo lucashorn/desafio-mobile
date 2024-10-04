@@ -29,10 +29,6 @@ export class FotosPage implements OnInit {
     await this.photoService.loadSaved();
   }
 
-  public showActionSheet(photo: UserPhoto, position: number) {
-    this.photoService.showActionSheet(photo, position);
-  }
-
   public async toggleLike(photoId: string, liked: boolean) {
     await this.supabase.toggleLikeOnPhoto(liked, photoId)
     await this.photoService.loadSaved()

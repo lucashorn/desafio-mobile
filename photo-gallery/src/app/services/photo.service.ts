@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
-import { ActionSheetController } from '@ionic/angular';
 import { SupabaseService } from './supabase.service';
 import { UserService } from './user.service';
 
@@ -24,39 +23,8 @@ export class PhotoService{
 
   user: any;
 
-  constructor(private actionSheetController: ActionSheetController, private supabase: SupabaseService, private userService: UserService) {
+  constructor(private supabase: SupabaseService, private userService: UserService) {
     this.user = this.userService.getUser();
-  }
-
-  public async showActionSheet(photo: UserPhoto, position: number) {
-    const actionSheet = await this.actionSheetController.create({
-      header: 'Fotos',
-      buttons: [
-      {
-        text: 'Delete',
-        role: 'destructive',
-        icon: 'trash',
-        handler: () => {
-          this.deletePicture(photo, position);
-        }
-      },
-      // {
-      //   text: 'Download',
-      //   role: 'destructive',
-      //   icon: 'download',
-      //   handler: () => {
-          
-      //   }
-      // },
-      {
-        text: 'Cancel',
-        icon: 'close',
-        role: 'cancel',
-        handler: () => {
-        }
-      }]
-    });
-    await actionSheet.present();
   }
 
   public async captureProfilePhoto() : Promise<Photo> {
@@ -149,20 +117,5 @@ export class PhotoService{
 
     this.photos.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
 
-  }
-
-  public async deletePicture(photo: UserPhoto, position: number) {
-    this.photos.splice(position, 1);
-
-    const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
-
-    try {
-      await Filesystem.deleteFile({
-        path: filename,
-        directory: Directory.Data
-      });
-    } catch (error) {
-      console.error('Erro ao excluir o arquivo', error);
-    }
   }
 }
